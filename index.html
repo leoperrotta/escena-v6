@@ -805,6 +805,7 @@ async function analizarFormulario(){
   showSection('analyzing-wrap');
   try{
     const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'gemini-3.1-flash-lite-preview',max_tokens:300,system:'Analizador de formularios de perfumería. Solo respondés en el formato indicado.',messages:[{role:'user',content:`Analizá este diagnóstico y detectá contradicciones.\n\n${fmt(D)}\n\nTIPOS: mismo perfume en pos y neg, lo que atrae contradice lo que rechaza, familias contradicen rechazos, intención contradice referencias.\n\nRESPONDÉ EXACTAMENTE:\nSIN_CONTRADICCIONES\no\nHAY_CONTRADICCIONES\n[pregunta concreta en español, tuteando, seco]`}]})});
+    if(!res.ok){document.querySelector('.load-status').textContent=apiError(res.status);await new Promise(r=>setTimeout(r,2200));mostrarPiramide(D);return;}
     const data=await res.json();
     const text=data.content[0].text.trim();
     if(text.startsWith('HAY_CONTRADICCIONES')){
@@ -814,7 +815,7 @@ async function analizarFormulario(){
       document.getElementById('btn-send').disabled=false;
       document.getElementById('user-input').focus();
     }else{mostrarPiramide(D);}
-  }catch(err){mostrarPiramide(D);}
+  }catch(err){document.querySelector('.load-status').textContent='Sin respuesta. Revisá tu conexión.';await new Promise(r=>setTimeout(r,2200));mostrarPiramide(D);}
   btn.disabled=false;
 }
 
