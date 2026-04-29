@@ -13,6 +13,7 @@ export default async function handler(req, res) {
     const body = req.body;
     const systemPrompt = body.system || '';
     const messages = body.messages || [];
+    const maxTokens = Math.min(body.max_tokens || 600, 2000);
 
     const contents = [];
     if (systemPrompt) {
@@ -20,17 +21,22 @@ export default async function handler(req, res) {
       contents.push({ role: 'model', parts: [{ text: 'Entendido. Seguiré estas instrucciones.' }] });
     }
     for (const m of messages) {
-      contents.push({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] });
+      contents.push({
+        role: m.role === 'assistant' ? 'model' : 'user',
+        parts: [{ text: m.content }],
+      });
     }
-
-    const geminiBody = {
-      contents,
-      generationConfig: { maxOutputTokens: Math.min(body.max_tokens || 600, 2000), temperature: 0.7 },
-    };
 
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key=${apiKey}`,
-      { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(geminiBody) }
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents,
+          generationConfig: { maxOutputTokens: maxTokens, temperature: 0.7 },
+        }),
+      }
     );
 
     const data = await response.json();

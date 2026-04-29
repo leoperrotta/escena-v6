@@ -3,8 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title> </title>
-<link rel="icon" type="image/png" href="/ES.png">
+<title>ESCENA — SCORE</title>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <style>
@@ -124,6 +123,30 @@
   .refs-val{font-size:12px;color:var(--ink);line-height:1.5;}
   .refs-regen{background:none;border:none;color:var(--dim);font-family:'Courier New',Courier,monospace;font-size:9px;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;padding:12px 0 0;display:block;}
   .refs-regen:hover{color:var(--ink);}
+
+  /* PREGUNTA A ESCENA */
+  .pregunta-escena{margin-top:32px;border-top:1px solid var(--rule2);padding-top:22px;}
+  .pregunta-escena-lbl{font-size:9px;letter-spacing:.25em;color:var(--dim);text-transform:uppercase;margin-bottom:6px;}
+  .pregunta-escena-sub{font-size:11px;color:var(--mid);line-height:1.7;margin-bottom:12px;}
+
+  /* COMPLETE SCREEN */
+  #complete-wrap{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;max-width:680px;margin:0 auto;padding:64px 40px;width:100%;animation:enter .5s ease forwards;}
+  .complete-obra{font-size:9px;letter-spacing:.35em;color:var(--dim);text-transform:uppercase;margin-bottom:32px;}
+  .complete-title{font-size:clamp(24px,4vw,48px);font-weight:700;color:var(--ink);line-height:1.1;margin-bottom:8px;}
+  .complete-sub{font-size:clamp(24px,4vw,48px);font-weight:400;color:var(--mid);line-height:1.1;margin-bottom:40px;}
+  .complete-rule{border:none;border-top:1px solid var(--ink);margin:0 0 32px;width:100%;}
+  .complete-manifiesto{font-size:13px;color:var(--ink);line-height:2.0;max-width:480px;margin-bottom:48px;min-height:60px;font-style:italic;}
+  .complete-manifiesto-loading{font-size:9px;color:var(--dim);letter-spacing:.3em;text-transform:uppercase;padding:4px 0;}
+  .progress-label{font-size:9px;letter-spacing:.2em;color:var(--dim);text-transform:uppercase;margin-bottom:16px;}
+  .progress-steps{display:flex;flex-direction:column;gap:0;width:100%;max-width:480px;}
+  .progress-step{display:grid;grid-template-columns:20px 1fr;gap:12px;align-items:start;padding:10px 0;border-bottom:1px solid var(--rule);}
+  .progress-step:last-child{border-bottom:none;}
+  .progress-step-dot{width:7px;height:7px;border-radius:50%;border:1px solid var(--dim);margin-top:4px;justify-self:center;}
+  .progress-step-dot.active{background:var(--ink);border-color:var(--ink);}
+  .progress-step-dot.done{background:var(--ink);border-color:var(--ink);}
+  .progress-step-title{font-size:11px;color:var(--ink);letter-spacing:.05em;margin-bottom:2px;}
+  .progress-step-title.dim{color:var(--dim);}
+  .progress-step-desc{font-size:10px;color:var(--mid);line-height:1.6;}
   .btn-confirm{margin-top:40px;width:100%;background:var(--ink);color:var(--paper);font-family:'Courier New',Courier,monospace;font-size:11px;font-weight:700;letter-spacing:.25em;text-transform:uppercase;padding:18px;border:1px solid var(--ink);cursor:pointer;transition:all .12s;margin-bottom:14px;}
   .btn-confirm:hover:not(:disabled){background:var(--paper);color:var(--ink);}
   .btn-confirm:disabled{opacity:.35;cursor:not-allowed;}
@@ -153,11 +176,7 @@
 
   /* COMPLETE */
   #complete-wrap{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;max-width:680px;margin:0 auto;padding:64px 40px;width:100%;animation:enter .5s ease forwards;}
-  .complete-tag{font-size:9px;letter-spacing:.35em;color:var(--dim);text-transform:uppercase;margin-bottom:32px;}
-  .complete-title{font-size:clamp(24px,4vw,48px);font-weight:700;color:var(--ink);line-height:1.1;margin-bottom:8px;}
-  .complete-sub{font-size:clamp(24px,4vw,48px);font-weight:400;color:var(--mid);line-height:1.1;margin-bottom:40px;}
-  .complete-rule{border:none;border-top:1px solid var(--ink);margin:0 0 32px;width:100%;}
-  .complete-body{font-size:13px;color:var(--mid);line-height:1.9;max-width:440px;}
+  /* complete screen handled above */
 
   ::-webkit-scrollbar{width:3px;} ::-webkit-scrollbar-track{background:var(--paper);} ::-webkit-scrollbar-thumb{background:var(--rule2);}
   @keyframes enter{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
@@ -342,6 +361,12 @@ const CONFIG={EMAILJS_PUBLIC_KEY:'nBSJP2Xoy1yjd1uqb',EMAILJS_SERVICE_ID:'service
     <div class="pyr-vis-lbl">REFERENCIAS CULTURALES</div>
     <div id="refs-zone"><button class="refs-btn" onclick="generarReferencias()">GENERAR ↗</button></div>
   </div>
+  <!-- PREGUNTA A ESCENA -->
+  <div class="pregunta-escena">
+    <div class="pregunta-escena-lbl">MENSAJE A ESCENA</div>
+    <div class="pregunta-escena-sub">¿Hay algo que no preguntamos y que querés que Leo sepa antes de construir tu fragancia?</div>
+    <textarea id="pyr-pregunta" class="ta-lg" placeholder="Opcional. Va directo a Leo junto con tu diagnóstico." style="width:100%;"></textarea>
+  </div>
   <button class="btn-confirm" id="btn-confirm" onclick="confirmarEnvio()">CONFIRMAR Y ENVIAR A ESCENA</button>
   <div class="confirm-meta">ESCENA SCORE — DIAGNÓSTICO AUTORAL / USO INTERNO</div>
 </div>
@@ -358,11 +383,26 @@ const CONFIG={EMAILJS_PUBLIC_KEY:'nBSJP2Xoy1yjd1uqb',EMAILJS_SERVICE_ID:'service
 </div>
 
 <div id="complete-wrap" class="hidden">
-  <div class="complete-tag">ESCENA SCORE — DIAGNÓSTICO COMPLETO</div>
+  <div class="complete-obra" id="complete-obra">ESCENA SCORE — OBRA 0001</div>
   <div class="complete-title">Diagnóstico recibido.</div>
   <div class="complete-sub">ESCENA ya tiene tu encargo.</div>
   <hr class="complete-rule">
-  <p class="complete-body">En las próximas 48 horas vas a recibir la dirección olfativa autoral construida para vos. Es única. No existe en ningún catálogo.</p>
+  <div class="complete-manifiesto" id="complete-manifiesto"><span class="complete-manifiesto-loading">—</span></div>
+  <div class="progress-label">ESTADO DE LA OBRA</div>
+  <div class="progress-steps">
+    <div class="progress-step">
+      <div class="progress-step-dot done"></div>
+      <div><div class="progress-step-title">Diagnóstico recibido</div><div class="progress-step-desc">Leo tiene tus datos. El proceso comenzó.</div></div>
+    </div>
+    <div class="progress-step">
+      <div class="progress-step-dot"></div>
+      <div><div class="progress-step-title dim">En bench</div><div class="progress-step-desc">La fórmula está siendo construida y evaluada.</div></div>
+    </div>
+    <div class="progress-step">
+      <div class="progress-step-dot"></div>
+      <div><div class="progress-step-title dim">Lista para entrega</div><div class="progress-step-desc">Tu fragancia está terminada. Nos ponemos en contacto.</div></div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -538,11 +578,12 @@ function recoger(){
     refNeg:document.getElementById('f_ref_neg').value.trim(),
     momentos:getChips('chips-momentos'),
     contexto:document.getElementById('f_contexto').value.trim(),
+    preguntaEscena:''
   };
 }
 
 function fmt(d){
-  return`NOMBRE: ${d.nombre||'—'}\nPROFESIÓN: ${d.profesion||'—'}\nCIUDAD: ${d.ciudad||'—'}\nGÉNERO: ${d.genero||'—'}\nRITMO: ${d.ritmo||'—'}\nNOMBRE PROVISIONAL: ${d.fragName||'—'}\nINTENCIÓN: ${d.intencion||'—'}\nNARRACIÓN: ${d.narracion||'—'}\nATRAE: ${d.atrae||'—'}\nRECHAZA: ${d.rechaza||'—'}\nFAMILIAS: ${d.familias||'—'}\nPOSICIÓN: ${d.mapa||'—'}\nREF+: ${d.refPos||'—'}\nREF−: ${d.refNeg||'—'}\nMOMENTOS: ${d.momentos||'—'}\nCONTEXTO: ${d.contexto||'—'}`;
+  return`NOMBRE: ${d.nombre||'—'}\nEMAIL: ${d.email||'—'}\nPROFESIÓN: ${d.profesion||'—'}\nCIUDAD: ${d.ciudad||'—'}\nGÉNERO: ${d.genero||'—'}\nRITMO: ${d.ritmo||'—'}\nNOMBRE PROVISIONAL: ${d.fragName||'—'}\nINTENCIÓN: ${d.intencion||'—'}\nNARRACIÓN: ${d.narracion||'—'}\nATRAE: ${d.atrae||'—'}\nRECHAZA: ${d.rechaza||'—'}\nFAMILIAS: ${d.familias||'—'}\nPOSICIÓN: ${d.mapa||'—'}\nREF+: ${d.refPos||'—'}\nREF−: ${d.refNeg||'—'}\nMOMENTOS: ${d.momentos||'—'}\nCONTEXTO: ${d.contexto||'—'}${d.preguntaEscena?'\nMENSAJE A LEO: '+d.preguntaEscena:''}`;
 }
 
 // ── PIRÁMIDE EVOCATIVA ──
@@ -793,18 +834,54 @@ async function responderChat(){
 }
 
 // ── CONFIRMAR ──
+function generarNumeroObra(){
+  const stored=localStorage.getItem('escena_obra_counter');
+  const n=(parseInt(stored)||0)+1;
+  localStorage.setItem('escena_obra_counter',n);
+  return String(n).padStart(4,'0');
+}
+
+async function generarManifiesto(d,obraNum){
+  const el=document.getElementById('complete-manifiesto');
+  el.innerHTML='<span class="complete-manifiesto-loading">GENERANDO...</span>';
+  try{
+    const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+      max_tokens:200,
+      system:'Escritor de manifiestos de perfumería autoral. Tono seco, preciso, cinematográfico. Sin adornos. Sin hipérbole. Sin beauty copy. Frases cortas.',
+      messages:[{role:'user',content:`Escribí una declaración breve (3-4 oraciones) sobre esta fragancia específica. No describas notas. Describí qué es este objeto para esta persona. En qué conversación entra. Por qué es única.
+
+Nombre de obra: ESCENA-${obraNum}
+Cliente: ${d.nombre||'—'} / ${d.profesion||'—'} / ${d.ciudad||'—'}
+Intención: ${d.intencion||'—'}
+Narración: ${d.narracion||'—'}
+Nombre provisional: ${d.fragName||'—'}
+
+Respondé solo con el texto del manifiesto, sin título ni firma.`}]
+    })});
+    const data=await res.json();
+    const txt=(data.content&&data.content[0]&&data.content[0].text)||'';
+    el.textContent=txt.trim()||'Una fragancia construida para una sola persona. Sin catálogo, sin precedente.';
+  }catch(e){
+    el.textContent='Una fragancia construida para una sola persona. Sin catálogo, sin precedente.';
+  }
+}
+
 async function confirmarEnvio(){
   const btn=document.getElementById('btn-confirm');
   btn.disabled=true;btn.textContent='ENVIANDO...';
+  D.preguntaEscena=(document.getElementById('pyr-pregunta')||{}).value||'';
   const fecha=new Date().toLocaleDateString('es-AR');
+  const obraNum=generarNumeroObra();
   let acl='';
   if(chatHistory.length>0)acl='\n\nACLARACIONES\n'+chatHistory.map(m=>`${m.role==='user'?'CLIENTE':'SCORE'}:\n${m.content}`).join('\n\n---\n\n');
-  const msg=`ESCENA SCORE — DIAGNÓSTICO\nFecha: ${fecha}\n========================================\n\n${fmt(D)}${acl}\n\n========================================\nESCENA SCORE / USO INTERNO`;
+  const msg=`ESCENA SCORE — DIAGNÓSTICO\nFecha: ${fecha}\nOBRA: ESCENA-${obraNum}\n========================================\n\n${fmt(D)}${acl}\n\n========================================\nESCENA SCORE / USO INTERNO`;
   try{
-    await emailjs.send(CONFIG.EMAILJS_SERVICE_ID,CONFIG.EMAILJS_TEMPLATE_ID,{to_email:CONFIG.EMAIL_DESTINO,subject:`ESCENA SCORE — ${D.nombre||'Diagnóstico'} — ${fecha}`,message:msg,name:D.nombre||'Cliente',email:D.email||''});
+    await emailjs.send(CONFIG.EMAILJS_SERVICE_ID,CONFIG.EMAILJS_TEMPLATE_ID,{to_email:CONFIG.EMAIL_DESTINO,subject:`ESCENA SCORE — ESCENA-${obraNum} — ${D.nombre||'Diagnóstico'} — ${fecha}`,message:msg,name:D.nombre||'Cliente',email:D.email||''});
   }catch(err){console.error(err);}
+  document.getElementById('complete-obra').textContent=`ESCENA SCORE — OBRA ${obraNum}`;
   showSection('complete-wrap');
   document.getElementById('strip-right').textContent='SCORE / DIAGNÓSTICO ENVIADO';
+  generarManifiesto(D,obraNum);
 }
 
 // ── UI ──
