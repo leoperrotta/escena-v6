@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ESCENA — SCORE</title>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+  :root { --paper:#f0ece3;--paper2:#e8e3d8;--ink:#1a1814;--mid:#5a5548;--dim:#9a9488;--off:#bdb7ae;--rule:#ccc7bc;--rule2:#a8a29a; }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;}
+  body{background:var(--paper);color:var(--ink);font-family:'Courier New',Courier,monospace;font-size:13px;line-height:1.6;display:flex;flex-direction:column;}
+  .hidden{display:none!important;}
+  .strip{border-bottom:1px solid var(--ink);padding:14px 40px;display:flex;justify-content:space-between;align-items:baseline;background:var(--paper);position:sticky;top:0;z-index:100;flex-shrink:0;}
+  .strip-logo{font-size:12px;font-weight:700;letter-spacing:.25em;color:var(--ink);text-transform:uppercase;}
+  .strip-right{font-size:10px;letter-spacing:.15em;color:var(--dim);text-transform:uppercase;}
+  #landing{flex:1;display:flex;flex-direction:column;justify-content:center;max-width:680px;margin:0 auto;padding:64px 40px;width:100%;animation:enter .5s ease forwards;}
+  .eyebrow{font-size:9px;letter-spacing:.35em;color:var(--dim);text-transform:uppercase;margin-bottom:32px;}
+  .land-title{font-size:clamp(28px,5vw,60px);font-weight:700;color:var(--ink);line-height:1.0;letter-spacing:-.02em;margin-bottom:4px;}
+  .land-sub{font-size:clamp(28px,5vw,60px);font-weight:400;color:var(--mid);line-height:1.0;letter-spacing:-.02em;margin-bottom:36px;}
+  .land-rule{border:none;border-top:1px solid var(--ink);margin:0 0 32px;}
+  .land-body{font-size:13px;color:var(--mid);line-height:1.9;margin-bottom:48px;max-width:460px;}
+  .proc-grid{display:grid;grid-template-columns:1fr 1fr 1fr;border:1px solid var(--ink);margin-bottom:48px;}
+  .proc{padding:16px 14px;border-right:1px solid var(--rule2);}
+  .proc:last-child{border-right:none;}
+  .proc-n{font-size:9px;letter-spacing:.2em;color:var(--dim);text-transform:uppercase;margin-bottom:6px;}
+  .proc-t{font-size:11px;color:var(--mid);line-height:1.7;}
+  .btn-primary{background:var(--ink);color:var(--paper);font-family:'Courier New',Courier,monospace;font-size:11px;font-weight:700;letter-spacing:.25em;text-transform:uppercase;padding:15px 40px;cursor:pointer;border:1px solid var(--ink);transition:all .12s;}
+  .btn-primary:hover{background:var(--paper);color:var(--ink);}
+  .land-note{margin-top:14px;font-size:10px;letter-spacing:.1em;color:var(--off);text-transform:uppercase;}
+  #form-wrap{animation:enter .4s ease forwards;overflow-y:auto;flex:1;}
+  .page{max-width:680px;margin:0 auto;padding:56px 40px;}
+  .form-head{margin-bottom:48px;}
+  .form-eyebrow{font-size:9px;letter-spacing:.35em;color:var(--dim);text-transform:uppercase;margin-bottom:10px;}
+  .form-title{font-size:24px;font-weight:700;color:var(--ink);}
+  .blk{border-top:1px solid var(--ink);padding:36px 0;}
+  .blk-head{display:grid;grid-template-columns:120px 1fr;gap:16px;align-items:baseline;margin-bottom:16px;}
+  .blk-n{font-size:9px;letter-spacing:.2em;color:var(--dim);text-transform:uppercase;}
+  .blk-title{font-size:15px;font-weight:700;color:var(--ink);}
+  .blk-desc{font-size:11px;color:var(--mid);line-height:1.8;margin-bottom:20px;padding-left:136px;}
+  .fg{margin-bottom:12px;} .fg-2{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+  .fl{font-size:9px;letter-spacing:.2em;color:var(--dim);text-transform:uppercase;display:block;margin-bottom:6px;}
+  input[type="text"],input[type="email"]{width:100%;background:transparent;border:none;border-bottom:1px solid var(--ink);color:var(--ink);font-family:'Courier New',Courier,monospace;font-size:13px;padding:8px 0 6px;outline:none;}
+  input::placeholder,textarea::placeholder{color:var(--off);font-style:italic;}
+  textarea{width:100%;background:transparent;border:1px solid var(--rule2);color:var(--ink);font-family:'Courier New',Courier,monospace;font-size:13px;padding:12px 14px;outline:none;resize:vertical;min-height:90px;line-height:1.7;}
+  textarea:focus,input:focus{border-color:var(--ink);outline:none;}
+  .ta-lg{min-height:130px;}
+  .narr-box{border:1px solid var(--rule2);border-left:3px solid var(--ink);padding:18px 20px;margin-bottom:12px;background:var(--paper2);}
+  .narr-prompt{font-size:13px;color:var(--ink);line-height:1.8;margin-bottom:14px;}
+  .narr-eg{font-size:11px;color:var(--mid);line-height:2.0;}
+  .narr-eg strong{color:var(--ink);font-weight:700;}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+  .chip{border:1px solid var(--rule2);color:var(--mid);font-family:'Courier New',Courier,monospace;font-size:11px;padding:5px 14px;cursor:pointer;background:transparent;transition:all .1s;}
+  .chip:hover{border-color:var(--ink);color:var(--ink);}
+  .chip.on{background:var(--ink);color:var(--paper);border-color:var(--ink);}
+
+  /* RUEDA */
+  .wheel-wrap{display:flex;flex-direction:column;align-items:center;gap:16px;margin:8px 0;}
+  .sector-fill{fill:var(--paper2);stroke:var(--ink);stroke-width:1;cursor:pointer;transition:fill .15s;}
+  .sector-label{fill:var(--ink);font-family:'Courier New',Courier,monospace;font-size:9px;letter-spacing:.06em;pointer-events:none;text-anchor:middle;dominant-baseline:middle;}
+  .wheel-selected .sector-fill{fill:var(--ink);}
+  .wheel-selected .sector-label{fill:var(--paper);}
+  .wheel-legend{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-top:4px;}
+  .wleg{font-size:10px;color:var(--dim);padding:3px 10px;border:1px solid var(--rule);}
+  .wleg.on{background:var(--ink);color:var(--paper);border-color:var(--ink);}
+
+  /* MAPA */
+  .map-wrap{display:flex;flex-direction:column;align-items:center;gap:12px;margin:8px 0;}
+  .map-note{font-size:10px;color:var(--mid);font-style:italic;letter-spacing:.06em;text-align:center;min-height:18px;}
+
+  /* SUBMIT */
+  .submit-zone{border-top:1px solid var(--ink);padding:40px 0 0;margin-top:8px;}
+  .btn-submit{width:100%;background:var(--ink);color:var(--paper);font-family:'Courier New',Courier,monospace;font-size:11px;font-weight:700;letter-spacing:.25em;text-transform:uppercase;padding:18px;border:1px solid var(--ink);cursor:pointer;transition:all .12s;margin-bottom:14px;}
+  .btn-submit:hover:not(:disabled){background:var(--paper);color:var(--ink);}
+  .btn-submit:disabled{opacity:.35;cursor:not-allowed;}
+  .submit-meta{font-size:9px;letter-spacing:.15em;color:var(--off);text-align:center;text-transform:uppercase;}
+
+  /* ANALYZING */
+  #analyzing-wrap{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;max-width:680px;margin:0 auto;padding:64px 40px;width:100%;}
+  .load-label{font-size:9px;letter-spacing:.35em;color:var(--dim);margin-bottom:28px;text-transform:uppercase;}
+  .load-bar{width:240px;height:1px;background:var(--rule);position:relative;overflow:hidden;}
+  .load-bar::after{content:'';position:absolute;left:-60%;top:0;width:60%;height:100%;background:var(--ink);animation:sweep 1.4s ease-in-out infinite;}
+  .load-status{margin-top:20px;font-size:12px;color:var(--mid);font-style:italic;}
+
+  /* PIRÁMIDE */
+  #pyramid-wrap{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;max-width:680px;margin:0 auto;padding:56px 40px;width:100%;animation:enter .5s ease forwards;}
+  .pyr-eyebrow{font-size:9px;letter-spacing:.35em;color:var(--dim);text-transform:uppercase;margin-bottom:32px;}
+  .pyr-title{font-size:24px;font-weight:700;color:var(--ink);margin-bottom:40px;}
+  .pyr-container{width:100%;margin-bottom:32px;}
+  .pyr-level{display:flex;margin-bottom:3px;animation:enter .4s ease forwards;opacity:0;}
+  .pyr-level:nth-child(1){animation-delay:.1s;} .pyr-level:nth-child(2){animation-delay:.3s;} .pyr-level:nth-child(3){animation-delay:.5s;}
+  .pyr-key{font-size:9px;letter-spacing:.15em;color:var(--dim);text-transform:uppercase;width:72px;flex-shrink:0;display:flex;align-items:center;}
+  .pyr-bar{flex:1;background:var(--paper2);border:1px solid var(--rule2);padding:12px 14px;display:flex;flex-wrap:wrap;gap:5px;}
+  .pyr-bar.salida{border-left:3px solid var(--ink);}
+  .pyr-bar.corazon{border-left:3px solid var(--mid);}
+  .pyr-bar.fondo{border-left:3px solid var(--dim);}
+  .pyr-note{font-size:11px;color:var(--ink);border:1px solid var(--rule2);padding:3px 10px;background:var(--paper);}
+  .pyr-meta{margin-top:24px;border-left:2px solid var(--rule2);padding-left:16px;}
+  .pyr-meta-line{font-size:11px;color:var(--mid);margin-bottom:4px;}
+  .pyr-meta-line span{color:var(--ink);}
+  .pyr-fams{margin-top:20px;}
+  .pyr-fams-label{font-size:9px;letter-spacing:.2em;color:var(--dim);text-transform:uppercase;margin-bottom:10px;}
+  .pyr-fams-list{display:flex;flex-wrap:wrap;gap:5px;}
+  .pyr-fam-tag{font-size:11px;color:var(--mid);border:1px solid var(--rule2);padding:3px 10px;}
+  .pyr-vis{margin-top:32px;border-top:1px solid var(--rule2);padding-top:22px;}
+  .pyr-vis-lbl{font-size:9px;letter-spacing:.25em;color:var(--dim);text-transform:uppercase;margin-bottom:12px;}
+  .vec-box{border:1px solid var(--rule2);background:var(--paper2);position:relative;width:100%;height:290px;cursor:grab;overflow:hidden;}
+  .vec-box:active{cursor:grabbing;}
+  .vec-foot{display:flex;justify-content:space-between;align-items:center;margin-top:8px;flex-wrap:wrap;gap:6px;}
+  .vec-hints{display:flex;flex-wrap:wrap;gap:6px 14px;}
+  .vec-hint{display:flex;align-items:center;gap:4px;}
+  .vec-dot{width:4px;height:4px;border-radius:50%;flex-shrink:0;}
+  .vec-hint-txt{font-size:8px;color:var(--dim);letter-spacing:.1em;}
+  .vec-drag{font-size:8px;color:var(--rule2);letter-spacing:.15em;}
+  .refs-btn{background:transparent;border:1px solid var(--ink);color:var(--ink);font-family:'Courier New',Courier,monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;padding:10px 18px;cursor:pointer;transition:all .12s;}
+  .refs-btn:hover{background:var(--ink);color:var(--paper);}
+  .refs-loading{font-size:9px;color:var(--dim);letter-spacing:.3em;text-transform:uppercase;padding:10px 0;}
+  .refs-list{margin-top:4px;border-left:2px solid var(--rule2);padding-left:16px;}
+  .refs-item{padding:10px 0;border-bottom:1px solid var(--rule);display:grid;grid-template-columns:100px 1fr;gap:8px;align-items:baseline;}
+  .refs-item:last-child{border-bottom:none;}
+  .refs-cat{font-size:8px;letter-spacing:.2em;color:var(--dim);text-transform:uppercase;}
+  .refs-val{font-size:12px;color:var(--ink);line-height:1.5;}
+  .refs-regen{background:none;border:none;color:var(--dim);font-family:'Courier New',Courier,monospace;font-size:9px;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;padding:12px 0 0;display:block;}
+  .refs-regen:hover{color:var(--ink);}
+  .btn-confirm{margin-top:40px;width:100%;background:var(--ink);color:var(--paper);font-family:'Courier New',Courier,monospace;font-size:11px;font-weight:700;letter-spacing:.25em;text-transform:uppercase;padding:18px;border:1px solid var(--ink);cursor:pointer;transition:all .12s;margin-bottom:14px;}
+  .btn-confirm:hover:not(:disabled){background:var(--paper);color:var(--ink);}
+  .btn-confirm:disabled{opacity:.35;cursor:not-allowed;}
+  .confirm-meta{font-size:9px;letter-spacing:.15em;color:var(--off);text-align:center;text-transform:uppercase;}
+
+  /* CHAT */
+  #chat-wrap{flex:1;display:flex;flex-direction:column;min-height:0;}
+  .chat-notice{background:var(--paper2);border-bottom:1px solid var(--rule2);border-left:3px solid var(--ink);padding:14px 40px;font-size:11px;color:var(--mid);line-height:1.7;flex-shrink:0;}
+  .chat-notice strong{color:var(--ink);display:block;margin-bottom:2px;font-size:10px;letter-spacing:.15em;text-transform:uppercase;}
+  #messages{flex:1;overflow-y:auto;padding:32px 40px;max-width:680px;margin:0 auto;width:100%;}
+  .msg{margin-bottom:28px;animation:enter .3s ease forwards;opacity:0;}
+  .msg-role{font-size:9px;letter-spacing:.25em;color:var(--dim);text-transform:uppercase;margin-bottom:8px;}
+  .msg-text{font-size:13px;line-height:1.9;color:var(--ink);}
+  .msg.user .msg-role{color:var(--rule2);} .msg.user .msg-text{color:var(--mid);}
+  .msg-rule{border:none;border-top:1px solid var(--rule);margin:0 0 28px;}
+  .typing{display:flex;gap:5px;align-items:center;padding:8px 0;}
+  .typing-dot{width:5px;height:5px;background:var(--rule2);animation:pulse 1.2s infinite;border-radius:50%;}
+  .typing-dot:nth-child(2){animation-delay:.2s;} .typing-dot:nth-child(3){animation-delay:.4s;}
+  #input-area{border-top:1px solid var(--ink);background:var(--paper);flex-shrink:0;}
+  .input-inner{max-width:680px;margin:0 auto;padding:16px 40px;display:flex;gap:16px;align-items:flex-end;}
+  #user-input{flex:1;background:transparent;border:none;border-bottom:1px solid var(--rule2);color:var(--ink);font-family:'Courier New',Courier,monospace;font-size:13px;padding:8px 0;outline:none;resize:none;min-height:36px;max-height:120px;line-height:1.6;}
+  #user-input::placeholder{color:var(--off);font-style:italic;}
+  #user-input:focus{border-bottom-color:var(--ink);}
+  .btn-send{background:var(--ink);color:var(--paper);font-family:'Courier New',Courier,monospace;font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;padding:10px 20px;border:1px solid var(--ink);cursor:pointer;transition:all .1s;flex-shrink:0;}
+  .btn-send:hover:not(:disabled){background:var(--paper);color:var(--ink);}
+  .btn-send:disabled{opacity:.35;cursor:not-allowed;}
+
+  /* COMPLETE */
+  #complete-wrap{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;max-width:680px;margin:0 auto;padding:64px 40px;width:100%;animation:enter .5s ease forwards;}
+  .complete-tag{font-size:9px;letter-spacing:.35em;color:var(--dim);text-transform:uppercase;margin-bottom:32px;}
+  .complete-title{font-size:clamp(24px,4vw,48px);font-weight:700;color:var(--ink);line-height:1.1;margin-bottom:8px;}
+  .complete-sub{font-size:clamp(24px,4vw,48px);font-weight:400;color:var(--mid);line-height:1.1;margin-bottom:40px;}
+  .complete-rule{border:none;border-top:1px solid var(--ink);margin:0 0 32px;width:100%;}
+  .complete-body{font-size:13px;color:var(--mid);line-height:1.9;max-width:440px;}
+
+  ::-webkit-scrollbar{width:3px;} ::-webkit-scrollbar-track{background:var(--paper);} ::-webkit-scrollbar-thumb{background:var(--rule2);}
+  @keyframes enter{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+  @keyframes sweep{0%{left:-60%;}100%{left:100%;}}
+  @keyframes pulse{0%,100%{opacity:.3;}50%{opacity:1;}}
+</style>
+</head>
+<body>
+
+<script>
+const CONFIG={EMAILJS_PUBLIC_KEY:'nBSJP2Xoy1yjd1uqb',EMAILJS_SERVICE_ID:'service_b8e46fk',EMAILJS_TEMPLATE_ID:'template_88f0ysu',EMAIL_DESTINO:'leo.perrottachico@gmail.com'};
+</script>
+
+<div class="strip">
+  <div class="strip-logo">ESCENA</div>
+  <div class="strip-right" id="strip-right">SCORE / DIAGNÓSTICO AUTORAL</div>
+</div>
+
+<div id="landing">
+  <div class="eyebrow">ESCENA — PERITAJE AUTORAL / SCORE</div>
+  <div class="land-title">Una fragancia.</div>
+  <div class="land-sub">Una persona.</div>
+  <hr class="land-rule">
+  <p class="land-body">No es recomendación. No es catálogo.<br><br>SCORE es un diagnóstico profundo de quién sos, cómo te movés en el mundo y qué atmósfera querés construir. De ahí sale una fragancia autoral diseñada exclusivamente para vos.</p>
+  <div class="proc-grid">
+    <div class="proc"><div class="proc-n">01 — DIAGNÓSTICO</div><div class="proc-t">Completás el formulario con tu mundo y tu deseo olfativo.</div></div>
+    <div class="proc"><div class="proc-n">02 — ANÁLISIS</div><div class="proc-t">Estudio técnico del perfil. Dirección olfativa.</div></div>
+    <div class="proc"><div class="proc-n">03 — INFORME</div><div class="proc-t">Pirámide, nombre autoral, narrativa. Entrega en 48 hs.</div></div>
+  </div>
+  <button class="btn-primary" onclick="showForm()">INICIAR DIAGNÓSTICO</button>
+  <div class="land-note">SERVICIO INDIVIDUAL — CONSULTAR CONDICIONES</div>
+</div>
+
+<div id="form-wrap" class="hidden">
+ <div class="page">
+  <div class="form-head">
+    <div class="form-eyebrow">ESCENA SCORE — DIAGNÓSTICO</div>
+    <div class="form-title">&gt;_ El encargo.</div>
+  </div>
+
+  <div class="blk">
+    <div class="blk-head"><span class="blk-n">01 — EL ENCARGO</span><span class="blk-title">Nombre y punto de partida.</span></div>
+    <p class="blk-desc">Si ya tenés un nombre provisional para tu fragancia, escribilo.</p>
+    <div class="fg fg-2">
+      <div><span class="fl">NOMBRE COMPLETO</span><input type="text" id="f_nombre" placeholder="Tu nombre"></div>
+      <div><span class="fl">EMAIL</span><input type="email" id="f_email" placeholder="tu@email.com"></div>
+    </div>
+    <div class="fg" style="margin-top:16px"><span class="fl">NOMBRE PROVISIONAL</span><input type="text" id="f_frag_name" placeholder="Opcional"></div>
+    <div class="fg" style="margin-top:16px"><span class="fl">INTENCIÓN</span><textarea id="f_intencion" placeholder="¿Qué querés que haga esta fragancia por vos?"></textarea></div>
+  </div>
+
+  <div class="blk">
+    <div class="blk-head"><span class="blk-n">02 — QUIÉN SOS</span><span class="blk-title">Tu mundo.</span></div>
+    <p class="blk-desc">Cómo te movés, qué hacés, en qué espacios vivís.</p>
+    <div class="fg fg-2">
+      <div><span class="fl">PROFESIÓN</span><input type="text" id="f_profesion" placeholder="—"></div>
+      <div><span class="fl">CIUDAD</span><input type="text" id="f_ciudad" placeholder="—"></div>
+    </div>
+    <div class="fg" style="margin-top:16px"><span class="fl">RITMO DE VIDA</span><textarea id="f_ritmo" placeholder="Describí tu ritmo. Espacios, entorno, energía cotidiana."></textarea></div>
+    <div class="fg" style="margin-top:14px"><span class="fl">GÉNERO DE USO</span>
+      <div class="chips" id="chips-genero">
+        <button class="chip" onclick="toggleChip(this)">Masculino</button>
+        <button class="chip" onclick="toggleChip(this)">Femenino</button>
+        <button class="chip" onclick="toggleChip(this)">Unisex</button>
+        <button class="chip" onclick="toggleChip(this)">Sin definición</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="blk">
+    <div class="blk-head"><span class="blk-n">03 — LA NARRACIÓN</span><span class="blk-title">Contá la fragancia en tu lenguaje.</span></div>
+    <p class="blk-desc">No necesitás saber de perfumes. Necesitás saber de vos.</p>
+    <div class="narr-box">
+      <p class="narr-prompt">Describí la fragancia como si fuera un proyecto de tu campo.</p>
+      <div class="narr-eg">
+        <strong>ARQUITECTO —</strong> "quiero la solidez del hormigón visto pero con luz entrando desde arriba"<br>
+        <strong>DEPORTISTA —</strong> "la concentración antes de salir a la cancha, no el sudor del partido"<br>
+        <strong>CHEF —</strong> "la reducción cuando ya casi está, el vapor que sube antes de servir"<br>
+        <strong>MÚSICO —</strong> "el silencio entre dos notas, no el acorde en sí"
+      </div>
+    </div>
+    <div class="fg"><span class="fl">TU DESCRIPCIÓN</span><textarea id="f_narracion" class="ta-lg" placeholder="Sin filtro técnico."></textarea></div>
+  </div>
+
+  <div class="blk">
+    <div class="blk-head"><span class="blk-n">04 — MUNDO SENSORIAL</span><span class="blk-title">Imágenes, materiales, atmósferas.</span></div>
+    <p class="blk-desc">Sin tecnicismos. Lo que resuena y lo que definitivamente no.</p>
+    <div class="fg"><span class="fl">LO QUE ATRAE</span><textarea id="f_atrae" placeholder="Texturas, materiales, imágenes, lugares, momentos."></textarea></div>
+    <div class="fg" style="margin-top:12px"><span class="fl">LO QUE RECHAZA</span><textarea id="f_rechaza" placeholder="Qué evitar. Lo que definitivamente no."></textarea></div>
+  </div>
+
+  <div class="blk">
+    <div class="blk-head"><span class="blk-n">05 — FAMILIAS</span><span class="blk-title">Mundo olfativo.</span></div>
+    <p class="blk-desc">Seleccioná las familias que resuenan. Podés elegir más de una.</p>
+    <div class="wheel-wrap">
+      <svg id="wheel-svg" width="300" height="300" viewBox="0 0 300 300" style="cursor:pointer"></svg>
+      <div class="wheel-legend" id="wheel-legend"></div>
+    </div>
+  </div>
+
+  <div class="blk">
+    <div class="blk-head"><span class="blk-n">06 — POSICIÓN</span><span class="blk-title">Ubicá tu fragancia.</span></div>
+    <p class="blk-desc">Hacé clic en el mapa para indicar dónde querés que viva tu fragancia.</p>
+    <div class="map-wrap">
+      <svg id="map-svg" width="320" height="260" viewBox="0 0 320 260" style="cursor:crosshair"></svg>
+      <div class="map-note" id="map-note">Hacé clic para ubicar tu fragancia</div>
+    </div>
+  </div>
+
+  <div class="blk">
+    <div class="blk-head"><span class="blk-n">07 — REFERENCIAS</span><span class="blk-title">Lo que ya conocés.</span></div>
+    <p class="blk-desc">Perfumes que usaste, notas que recordás.</p>
+    <div class="fg"><span class="fl">REFERENCIAS POSITIVAS</span><textarea id="f_ref_pos" placeholder="Perfumes o notas que te gustaron."></textarea></div>
+    <div class="fg" style="margin-top:12px"><span class="fl">REFERENCIAS NEGATIVAS</span><textarea id="f_ref_neg" placeholder="Lo que no funcionó. Por qué, si lo sabés."></textarea></div>
+  </div>
+
+  <div class="blk">
+    <div class="blk-head"><span class="blk-n">08 — CONTEXTO</span><span class="blk-title">Cuándo y dónde.</span></div>
+    <div class="fg"><span class="fl">MOMENTOS DE USO</span>
+      <div class="chips" id="chips-momentos">
+        <button class="chip" onclick="toggleChip(this)">Cotidiano</button>
+        <button class="chip" onclick="toggleChip(this)">Trabajo / oficina</button>
+        <button class="chip" onclick="toggleChip(this)">Trabajo físico</button>
+        <button class="chip" onclick="toggleChip(this)">Citas / noche</button>
+        <button class="chip" onclick="toggleChip(this)">Eventos / formal</button>
+        <button class="chip" onclick="toggleChip(this)">Firma personal única</button>
+      </div>
+    </div>
+    <div class="fg" style="margin-top:16px"><span class="fl">CONTEXTO ADICIONAL</span><textarea id="f_contexto" placeholder="Estación, clima, situación de vida."></textarea></div>
+  </div>
+
+  <div class="submit-zone">
+    <button class="btn-submit" id="btn-submit" onclick="analizarFormulario()">ENVIAR DIAGNÓSTICO</button>
+    <div class="submit-meta">ESCENA SCORE — EL SISTEMA ANALIZARÁ TUS RESPUESTAS ANTES DE ENVIAR</div>
+  </div>
+ </div>
+</div>
+
+<div id="analyzing-wrap" class="hidden">
+  <div class="load-label">ANALIZANDO DIAGNÓSTICO</div>
+  <div class="load-bar"></div>
+  <div class="load-status">Revisando consistencia de respuestas...</div>
+</div>
+
+<div id="pyramid-wrap" class="hidden">
+  <div class="pyr-eyebrow">ESCENA SCORE — SÍNTESIS</div>
+  <div class="pyr-title" id="pyr-titulo">—</div>
+  <div class="pyr-container">
+    <div class="pyr-level"><div class="pyr-key">SALIDA</div><div class="pyr-bar salida" id="pyr-salida"></div></div>
+    <div class="pyr-level"><div class="pyr-key">CORAZÓN</div><div class="pyr-bar corazon" id="pyr-corazon"></div></div>
+    <div class="pyr-level"><div class="pyr-key">FONDO</div><div class="pyr-bar fondo" id="pyr-fondo"></div></div>
+  </div>
+  <div class="pyr-meta">
+    <div class="pyr-meta-line">TEMPERATURA <span id="pyr-temp">—</span></div>
+    <div class="pyr-meta-line">PROYECCIÓN <span id="pyr-proy">—</span></div>
+  </div>
+  <div class="pyr-fams">
+    <div class="pyr-fams-label">FAMILIAS</div>
+    <div class="pyr-fams-list" id="pyr-familias"></div>
+  </div>
+  <!-- ESPACIO VECTORIAL -->
+  <div class="pyr-vis">
+    <div class="pyr-vis-lbl">ESPACIO VECTORIAL</div>
+    <div class="vec-box" id="vec-box">
+      <canvas id="vec-c"></canvas>
+      <div id="vec-labels" style="position:absolute;inset:0;pointer-events:none;overflow:hidden;"></div>
+    </div>
+    <div class="vec-foot">
+      <div class="vec-hints">
+        <div class="vec-hint"><div class="vec-dot" style="background:#1a1814"></div><span class="vec-hint-txt">fragancia</span></div>
+        <div class="vec-hint"><div class="vec-dot" style="background:#7a4800"></div><span class="vec-hint-txt">concepto</span></div>
+        <div class="vec-hint"><div class="vec-dot" style="background:#0a5a3a"></div><span class="vec-hint-txt">familia</span></div>
+        <div class="vec-hint"><div class="vec-dot" style="background:#8a2a00"></div><span class="vec-hint-txt">salida</span></div>
+        <div class="vec-hint"><div class="vec-dot" style="background:#8a1a50"></div><span class="vec-hint-txt">corazón</span></div>
+        <div class="vec-hint"><div class="vec-dot" style="background:#3a2888"></div><span class="vec-hint-txt">fondo</span></div>
+      </div>
+      <span class="vec-drag">DRAG TO ROTATE</span>
+    </div>
+  </div>
+  <!-- REFERENCIAS CULTURALES -->
+  <div class="pyr-vis">
+    <div class="pyr-vis-lbl">REFERENCIAS CULTURALES</div>
+    <div id="refs-zone"><button class="refs-btn" onclick="generarReferencias()">GENERAR ↗</button></div>
+  </div>
+  <button class="btn-confirm" id="btn-confirm" onclick="confirmarEnvio()">CONFIRMAR Y ENVIAR A ESCENA</button>
+  <div class="confirm-meta">ESCENA SCORE — DIAGNÓSTICO AUTORAL / USO INTERNO</div>
+</div>
+
+<div id="chat-wrap" class="hidden">
+  <div class="chat-notice"><strong>ACLARACIÓN NECESARIA</strong>Encontré inconsistencias. Necesito que las aclaremos antes de enviar.</div>
+  <div id="messages"></div>
+  <div id="input-area">
+    <div class="input-inner">
+      <textarea id="user-input" placeholder="Escribí tu respuesta..." rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+      <button class="btn-send" id="btn-send" onclick="responderChat()">ENVIAR</button>
+    </div>
+  </div>
+</div>
+
+<div id="complete-wrap" class="hidden">
+  <div class="complete-tag">ESCENA SCORE — DIAGNÓSTICO COMPLETO</div>
+  <div class="complete-title">Diagnóstico recibido.</div>
+  <div class="complete-sub">ESCENA ya tiene tu encargo.</div>
+  <hr class="complete-rule">
+  <p class="complete-body">En las próximas 48 horas vas a recibir la dirección olfativa autoral construida para vos. Es única. No existe en ningún catálogo.</p>
+</div>
+
+<script>
+const SECTIONS=['landing','form-wrap','analyzing-wrap','pyramid-wrap','chat-wrap','complete-wrap'];
+function showSection(id){SECTIONS.forEach(s=>{const e=document.getElementById(s);if(e)e.classList.add('hidden');});const t=document.getElementById(id);if(t){t.classList.remove('hidden');window.scrollTo({top:0,behavior:'instant'});}}
+function showForm(){emailjs.init(CONFIG.EMAILJS_PUBLIC_KEY);showSection('form-wrap');}
+function toggleChip(el){el.classList.toggle('on');}
+function getChips(id){const c=document.getElementById(id);return c?Array.from(c.querySelectorAll('.chip.on')).map(b=>b.textContent).join(', '):'';}
+
+// ── RUEDA ──
+const FAMILIAS=[
+  {id:'citrico',label:'CÍTRICO'},
+  {id:'verde',label:'VERDE'},
+  {id:'floral',label:'FLORAL'},
+  {id:'acuatico',label:'ACUÁTICO'},
+  {id:'amaderado',label:'AMADERADO'},
+  {id:'ahumado',label:'AHUMADO'},
+  {id:'oriental',label:'ORIENTAL'},
+  {id:'cuero',label:'CUERO'},
+  {id:'resinoso',label:'RESINOSO'},
+];
+const wheelSel=new Set();
+
+function buildWheel(){
+  const svg=document.getElementById('wheel-svg');
+  const legend=document.getElementById('wheel-legend');
+  const cx=150,cy=150,ro=128,ri=48,n=FAMILIAS.length;
+  const step=(2*Math.PI)/n;
+
+  FAMILIAS.forEach((fam,i)=>{
+    const a0=i*step-Math.PI/2, a1=a0+step, gap=0.05;
+    const pts=[
+      [cx+ri*Math.cos(a0+gap), cy+ri*Math.sin(a0+gap)],
+      [cx+ro*Math.cos(a0+gap), cy+ro*Math.sin(a0+gap)],
+      [cx+ro*Math.cos(a1-gap), cy+ro*Math.sin(a1-gap)],
+      [cx+ri*Math.cos(a1-gap), cy+ri*Math.sin(a1-gap)],
+    ];
+    const d=`M${pts[0][0]},${pts[0][1]} L${pts[1][0]},${pts[1][1]} A${ro},${ro} 0 0,1 ${pts[2][0]},${pts[2][1]} L${pts[3][0]},${pts[3][1]} A${ri},${ri} 0 0,0 ${pts[0][0]},${pts[0][1]}Z`;
+    const aMid=(a0+a1)/2, rMid=(ro+ri)/2;
+    const tx=cx+rMid*Math.cos(aMid), ty=cy+rMid*Math.sin(aMid);
+    const rot=(aMid*180/Math.PI)+90;
+
+    const g=document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.dataset.id=fam.id;
+
+    const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d',d);
+    path.classList.add('sector-fill');
+
+    const text=document.createElementNS('http://www.w3.org/2000/svg','text');
+    text.classList.add('sector-label');
+    text.setAttribute('transform',`translate(${tx},${ty}) rotate(${rot})`);
+    text.setAttribute('dy','0.35em');
+    text.textContent=fam.label;
+
+    g.appendChild(path);g.appendChild(text);svg.appendChild(g);
+
+    g.addEventListener('click',()=>{
+      if(wheelSel.has(fam.id)){wheelSel.delete(fam.id);g.classList.remove('wheel-selected');}
+      else{wheelSel.add(fam.id);g.classList.add('wheel-selected');}
+      updateLegend();
+    });
+
+    const tag=document.createElement('div');
+    tag.className='wleg';tag.textContent=fam.label;tag.dataset.id=fam.id;
+    legend.appendChild(tag);
+  });
+
+  // Centro
+  const ct=document.createElementNS('http://www.w3.org/2000/svg','text');
+  ct.setAttribute('x',cx);ct.setAttribute('y',cy);
+  ct.setAttribute('text-anchor','middle');ct.setAttribute('dominant-baseline','middle');
+  ct.style.cssText="font-family:'Courier New',monospace;font-size:8px;letter-spacing:.15em;fill:var(--dim);";
+  ct.textContent='FAMILIA';svg.appendChild(ct);
+}
+
+function updateLegend(){
+  document.querySelectorAll('#wheel-legend .wleg').forEach(t=>t.classList.toggle('on',wheelSel.has(t.dataset.id)));
+}
+function getWheelFamilias(){return FAMILIAS.filter(f=>wheelSel.has(f.id)).map(f=>f.label).join(', ');}
+
+// ── MAPA ──
+let mapPoint=null;
+
+function buildMap(){
+  const svg=document.getElementById('map-svg');
+  const W=320,H=260,pl=72,pr=16,pt=28,pb=52;
+  const iW=W-pl-pr,iH=H-pt-pb;
+
+  // Grid
+  [0.25,0.5,0.75].forEach(f=>{
+    const xl=document.createElementNS('http://www.w3.org/2000/svg','line');
+    xl.setAttribute('x1',pl+f*iW);xl.setAttribute('x2',pl+f*iW);xl.setAttribute('y1',pt);xl.setAttribute('y2',pt+iH);
+    xl.style.cssText='stroke:var(--rule);stroke-width:.5';svg.appendChild(xl);
+    const yl=document.createElementNS('http://www.w3.org/2000/svg','line');
+    yl.setAttribute('x1',pl);yl.setAttribute('x2',pl+iW);yl.setAttribute('y1',pt+f*iH);yl.setAttribute('y2',pt+f*iH);
+    yl.style.cssText='stroke:var(--rule);stroke-width:.5';svg.appendChild(yl);
+  });
+
+  // Ejes
+  const axH=document.createElementNS('http://www.w3.org/2000/svg','line');
+  axH.setAttribute('x1',pl);axH.setAttribute('x2',pl+iW);axH.setAttribute('y1',pt+iH/2);axH.setAttribute('y2',pt+iH/2);
+  axH.style.cssText='stroke:var(--ink);stroke-width:1';svg.appendChild(axH);
+  const axV=document.createElementNS('http://www.w3.org/2000/svg','line');
+  axV.setAttribute('x1',pl+iW/2);axV.setAttribute('x2',pl+iW/2);axV.setAttribute('y1',pt);axV.setAttribute('y2',pt+iH);
+  axV.style.cssText='stroke:var(--ink);stroke-width:1';svg.appendChild(axV);
+
+  // Labels
+  function lbl(txt,x,y,anchor){
+    const t=document.createElementNS('http://www.w3.org/2000/svg','text');
+    t.setAttribute('x',x);t.setAttribute('y',y);t.setAttribute('text-anchor',anchor||'middle');
+    t.style.cssText="font-family:'Courier New',monospace;font-size:9px;letter-spacing:.15em;fill:var(--dim);";
+    t.textContent=txt;svg.appendChild(t);
+  }
+  lbl('FRESCO',pl,H-8,'start');
+  lbl('CÁLIDO',pl+iW,H-8,'end');
+  lbl('NOTORIA',pl+iW/2,pt-10);
+  lbl('DISCRETA',pl+iW/2,pt+iH+20);
+
+  // Click zone
+  const zone=document.createElementNS('http://www.w3.org/2000/svg','rect');
+  zone.setAttribute('x',pl);zone.setAttribute('y',pt);zone.setAttribute('width',iW);zone.setAttribute('height',iH);
+  zone.setAttribute('fill','transparent');svg.appendChild(zone);
+
+  // Point elements
+  const ring=document.createElementNS('http://www.w3.org/2000/svg','circle');
+  ring.setAttribute('r',14);ring.style.cssText='fill:none;stroke:var(--ink);stroke-width:1;opacity:.25;display:none;';svg.appendChild(ring);
+  const pt2=document.createElementNS('http://www.w3.org/2000/svg','circle');
+  pt2.setAttribute('r',5);pt2.style.cssText='fill:var(--ink);display:none;';svg.appendChild(pt2);
+
+  zone.addEventListener('click',e=>{
+    const bb=svg.getBoundingClientRect();
+    const sx=(e.clientX-bb.left)*(W/bb.width);
+    const sy=(e.clientY-bb.top)*(H/bb.height);
+    const nx=Math.max(0,Math.min(1,(sx-pl)/iW));
+    const ny=Math.max(0,Math.min(1,(sy-pt)/iH));
+    mapPoint={x:nx,y:ny};
+    const px2=pl+nx*iW, py2=pt+ny*iH;
+    pt2.setAttribute('cx',px2);pt2.setAttribute('cy',py2);pt2.style.display='';
+    ring.setAttribute('cx',px2);ring.setAttribute('cy',py2);ring.style.display='';
+    const t=nx<.33?'Fresca':nx<.67?'Templada':'Cálida';
+    const p=ny<.33?'Notoria':ny<.67?'Media':'Discreta';
+    document.getElementById('map-note').textContent=`${t} · ${p}`;
+  });
+}
+
+function getMapDesc(){
+  if(!mapPoint)return'No especificada';
+  const t=mapPoint.x<.33?'Fresca':mapPoint.x<.67?'Templada':'Cálida';
+  const p=mapPoint.y<.33?'Notoria':mapPoint.y<.67?'Media':'Discreta';
+  return`Temperatura: ${t} / Proyección: ${p}`;
+}
+
+// ── DATOS ──
+let D={},chatHistory=[];
+
+function recoger(){
+  return{
+    nombre:document.getElementById('f_nombre').value.trim(),
+    email:document.getElementById('f_email').value.trim(),
+    fragName:document.getElementById('f_frag_name').value.trim(),
+    intencion:document.getElementById('f_intencion').value.trim(),
+    profesion:document.getElementById('f_profesion').value.trim(),
+    ciudad:document.getElementById('f_ciudad').value.trim(),
+    ritmo:document.getElementById('f_ritmo').value.trim(),
+    genero:getChips('chips-genero'),
+    narracion:document.getElementById('f_narracion').value.trim(),
+    atrae:document.getElementById('f_atrae').value.trim(),
+    rechaza:document.getElementById('f_rechaza').value.trim(),
+    familias:getWheelFamilias(),
+    mapa:getMapDesc(),
+    refPos:document.getElementById('f_ref_pos').value.trim(),
+    refNeg:document.getElementById('f_ref_neg').value.trim(),
+    momentos:getChips('chips-momentos'),
+    contexto:document.getElementById('f_contexto').value.trim(),
+  };
+}
+
+function fmt(d){
+  return`NOMBRE: ${d.nombre||'—'}\nPROFESIÓN: ${d.profesion||'—'}\nCIUDAD: ${d.ciudad||'—'}\nGÉNERO: ${d.genero||'—'}\nRITMO: ${d.ritmo||'—'}\nNOMBRE PROVISIONAL: ${d.fragName||'—'}\nINTENCIÓN: ${d.intencion||'—'}\nNARRACIÓN: ${d.narracion||'—'}\nATRAE: ${d.atrae||'—'}\nRECHAZA: ${d.rechaza||'—'}\nFAMILIAS: ${d.familias||'—'}\nPOSICIÓN: ${d.mapa||'—'}\nREF+: ${d.refPos||'—'}\nREF−: ${d.refNeg||'—'}\nMOMENTOS: ${d.momentos||'—'}\nCONTEXTO: ${d.contexto||'—'}`;
+}
+
+// ── PIRÁMIDE EVOCATIVA ──
+const PYR_MAP={
+  'CÍTRICO':{nivel:'salida',notas:['Bergamota','Lima']},
+  'VERDE':{nivel:'salida',notas:['Hierba','Violeta hoja']},
+  'FLORAL':{nivel:'corazon',notas:['Rosa','Jazmín']},
+  'ACUÁTICO':{nivel:'salida',notas:['Ozónico','Marino']},
+  'AMADERADO':{nivel:'fondo',notas:['Cedro','Sándalo']},
+  'AHUMADO':{nivel:'fondo',notas:['Guayaco','Tabaco']},
+  'ORIENTAL':{nivel:'fondo',notas:['Ámbar','Benjuí']},
+  'CUERO':{nivel:'corazon',notas:['Cuero','Suederal']},
+  'RESINOSO':{nivel:'fondo',notas:['Incienso','Mirra']},
+};
+
+function buildPyr(famString){
+  const s=new Set(),c=new Set(),f=new Set();
+  (famString||'').split(',').map(x=>x.trim().toUpperCase()).forEach(fam=>{
+    const m=PYR_MAP[fam];
+    if(!m)return;
+    m.notas.slice(0,2).forEach(n=>{
+      if(m.nivel==='salida')s.add(n);
+      else if(m.nivel==='corazon')c.add(n);
+      else f.add(n);
+    });
+  });
+  if(s.size===0)s.add('Bergamota');
+  if(c.size===0)c.add('Iris');
+  if(f.size===0)f.add('Sándalo');
+  return{salida:[...s],corazon:[...c],fondo:[...f]};
+}
+
+// ── VECTOR SPACE ──
+let vecRaf=null, vecRenderer=null;
+
+function initVector(d){
+  const box=document.getElementById('vec-box');
+  const cvs=document.getElementById('vec-c');
+  const lbls=document.getElementById('vec-labels');
+  if(!box||!cvs||typeof THREE==='undefined')return;
+  if(vecRaf){cancelAnimationFrame(vecRaf);vecRaf=null;}
+  if(vecRenderer){vecRenderer.dispose();vecRenderer=null;}
+  lbls.innerHTML='';
+  const W=box.clientWidth||640,H=290;
+  cvs.style.cssText='position:absolute;top:0;left:0;';
+
+  const renderer=new THREE.WebGLRenderer({canvas:cvs,antialias:true,alpha:true});
+  renderer.setSize(W,H);renderer.setClearColor(0x000000,0);
+  vecRenderer=renderer;
+  const scene=new THREE.Scene();
+  const camera=new THREE.PerspectiveCamera(55,W/H,0.1,100);
+  camera.position.z=13;
+  const group=new THREE.Group();
+  scene.add(group);
+
+  // Build nodes from diagnosis data
+  const pyr=buildPyr(d.familias);
+  const fams=(d.familias||'').split(',').map(x=>x.trim()).filter(Boolean);
+  const nodes=[{id:'c',label:(d.fragName||d.nombre||'FRAGANCIA').toUpperCase(),type:'center',col:0x1a1814}];
+
+  const conceptFields=[
+    {k:'intencion',v:d.intencion},{k:'atrae',v:d.atrae},{k:'momentos',v:d.momentos}
+  ];
+  conceptFields.forEach(({k,v})=>{
+    if(v&&v.length>2){
+      const s=v.length>18?v.substring(0,18)+'…':v;
+      nodes.push({id:'con_'+k,label:s,type:'concept',col:0x7a4800});
+    }
+  });
+  fams.forEach((f,i)=>nodes.push({id:'fam_'+i,label:f.toUpperCase(),type:'family',col:0x0a5a3a}));
+  pyr.salida.forEach((n,i)=>nodes.push({id:'sal_'+i,label:n,type:'mat_s',col:0x8a2a00}));
+  pyr.corazon.forEach((n,i)=>nodes.push({id:'cor_'+i,label:n,type:'mat_c',col:0x8a1a50}));
+  pyr.fondo.forEach((n,i)=>nodes.push({id:'fnd_'+i,label:n,type:'mat_f',col:0x3a2888}));
+
+  // Edges
+  const edges=[];
+  nodes.filter(n=>n.type==='concept'||n.type==='family').forEach(n=>edges.push(['c',n.id]));
+  fams.forEach((f,fi)=>{
+    const m=PYR_MAP[f.toUpperCase()];if(!m)return;
+    nodes.filter(n=>n.type==='mat_s'||n.type==='mat_c'||n.type==='mat_f').forEach(n=>{
+      if(m.notas.includes(n.label))edges.push(['fam_'+fi,n.id]);
+    });
+  });
+  pyr.salida.forEach((_,i)=>pyr.corazon.forEach((_,j)=>edges.push(['sal_'+i,'cor_'+j])));
+  pyr.corazon.forEach((_,i)=>pyr.fondo.forEach((_,j)=>edges.push(['cor_'+i,'fnd_'+j])));
+
+  // Position on spheres
+  const byT={center:[],concept:[],family:[],mat_s:[],mat_c:[],mat_f:[]};
+  nodes.forEach(n=>byT[n.type]&&byT[n.type].push(n));
+  const phi=Math.PI*(3-Math.sqrt(5));
+  function sph(arr,r){return arr.map((n,i)=>{const y=(1-(i/Math.max(arr.length-1,1))*2)*r;const rr=Math.sqrt(Math.max(0,r*r-y*y));const t=phi*i;return{...n,pos:new THREE.Vector3(Math.cos(t)*rr,y,Math.sin(t)*rr)};});}
+  const placed=[
+    ...byT.center.map(n=>({...n,pos:new THREE.Vector3(0,0,0)})),
+    ...sph(byT.concept,2.8),...sph(byT.family,4.6),
+    ...sph([...byT.mat_s,...byT.mat_c,...byT.mat_f],7.0),
+  ];
+
+  const meshMap={},labelEls={};
+  placed.forEach(n=>{
+    const sz=n.type==='center'?.3:n.type==='concept'||n.type==='family'?.15:.09;
+    const mesh=new THREE.Mesh(new THREE.SphereGeometry(sz,14,14),new THREE.MeshBasicMaterial({color:n.col}));
+    mesh.position.copy(n.pos);group.add(mesh);meshMap[n.id]={mesh,node:n};
+    const el=document.createElement('div');
+    const lc=n.type==='center'?'#1a1814':n.type==='concept'?'#7a4800':n.type==='family'?'#0a5a3a':n.type==='mat_s'?'#8a2a00':n.type==='mat_c'?'#8a1a50':'#3a2888';
+    el.style.cssText=`position:absolute;transform:translateX(-50%);white-space:nowrap;font-family:'Courier New',monospace;font-size:${n.type==='center'?'8.5':'7'}px;letter-spacing:.13em;color:${lc};opacity:0;text-transform:uppercase;`;
+    el.textContent=n.label;lbls.appendChild(el);labelEls[n.id]=el;
+  });
+  edges.forEach(([a,b])=>{
+    const ma=meshMap[a],mb=meshMap[b];if(!ma||!mb)return;
+    const g=new THREE.BufferGeometry().setFromPoints([ma.mesh.position.clone(),mb.mesh.position.clone()]);
+    group.add(new THREE.Line(g,new THREE.LineBasicMaterial({color:0xa8a29a,transparent:true,opacity:0.5})));
+  });
+
+  const ctrl={isDown:false,lastX:0,lastY:0,rotX:.32,rotY:.55};
+  function anim(){
+    vecRaf=requestAnimationFrame(anim);
+    if(!ctrl.isDown)ctrl.rotY+=.0018;
+    group.rotation.x=ctrl.rotX;group.rotation.y=ctrl.rotY;
+    group.updateMatrixWorld(true);
+    Object.entries(meshMap).forEach(([id,{mesh,node}])=>{
+      const el=labelEls[id];if(!el)return;
+      const wp=mesh.position.clone().applyMatrix4(group.matrixWorld);
+      const proj=wp.project(camera);
+      const x=(proj.x+1)/2*W,y=-(proj.y-1)/2*H;
+      el.style.left=x+'px';el.style.top=(y+(node.type==='center'?22:11))+'px';
+      el.style.opacity=proj.z<1?(node.type==='center'?'1':'0.75'):'0';
+    });
+    renderer.render(scene,camera);
+  }
+  anim();
+
+  const onDown=e=>{ctrl.isDown=true;ctrl.lastX=e.clientX;ctrl.lastY=e.clientY;};
+  const onUp=()=>{ctrl.isDown=false;};
+  const onMove=e=>{if(!ctrl.isDown)return;ctrl.rotY+=(e.clientX-ctrl.lastX)*.005;ctrl.rotX+=(e.clientY-ctrl.lastY)*.005;ctrl.lastX=e.clientX;ctrl.lastY=e.clientY;};
+  box.addEventListener('mousedown',onDown);
+  window.addEventListener('mouseup',onUp);
+  window.addEventListener('mousemove',onMove);
+}
+
+// ── REFERENCIAS CULTURALES ──
+async function generarReferencias(){
+  const zone=document.getElementById('refs-zone');
+  zone.innerHTML='<div class="refs-loading">GENERANDO...</div>';
+  const profile=[D.fragName||D.nombre||'fragancia',D.familias||'',D.intencion||'',D.narracion||'',D.atrae||'',D.rechaza||'',D.refPos||''].filter(Boolean).join(' — ');
+  try{
+    const res=await fetch('/.netlify/functions/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+      max_tokens:800,
+      system:'Sos un curador cultural con conocimiento profundo de arte, cine, música, fotografía y literatura. Respondés en español, de forma precisa y sin adornos.',
+      messages:[{role:'user',content:`Dado este perfil de fragancia, identificá 5 referencias culturales que habiten el mismo espacio sensorial, emocional o estético. No que "huelen" a eso — que VIVEN en ese registro.
+
+Perfil: ${profile}
+
+Respondé EXACTAMENTE en este formato, sin introducción ni cierre:
+CINE — [título] ([año]) — [director/a]
+MÚSICA — [álbum o track] — [artista]
+FOTOGRAFÍA — [serie o obra] — [fotógrafo/a]
+LITERATURA — [título] — [autor/a]
+ARTE — [obra o serie] — [artista]`}]
+    })});
+    const data=await res.json();
+    const txt=(data.content&&data.content[0]&&data.content[0].text)||'';
+    const lines=txt.trim().split('\n').filter(l=>l.includes('—'));
+    if(lines.length){
+      const items=lines.map(l=>{
+        const dash=l.indexOf('—');
+        const cat=l.substring(0,dash).trim();
+        const val=l.substring(dash+1).trim();
+        return`<div class="refs-item"><span class="refs-cat">${cat}</span><span class="refs-val">${val}</span></div>`;
+      }).join('');
+      zone.innerHTML=`<div class="refs-list">${items}</div><button class="refs-regen" onclick="generarReferencias()">REGENERAR ↗</button>`;
+    }else{
+      zone.innerHTML='<div class="refs-loading">Sin resultado. <button class="refs-btn" style="margin-left:8px" onclick="generarReferencias()">REINTENTAR</button></div>';
+    }
+  }catch(e){
+    zone.innerHTML='<div class="refs-loading">Error. <button class="refs-btn" style="margin-left:8px" onclick="generarReferencias()">REINTENTAR</button></div>';
+  }
+}
+
+function mostrarPiramide(d){
+  document.getElementById('pyr-titulo').textContent=d.fragName||d.nombre||'DIAGNÓSTICO';
+  const pyr=buildPyr(d.familias);
+  const fn=id=>document.getElementById(id).innerHTML=pyr[id==='pyr-salida'?'salida':id==='pyr-corazon'?'corazon':'fondo'].map(n=>`<div class="pyr-note">${n}</div>`).join('');
+  fn('pyr-salida');fn('pyr-corazon');fn('pyr-fondo');
+
+  const fams=(d.familias||'').split(',').map(x=>x.trim()).filter(Boolean);
+  document.getElementById('pyr-familias').innerHTML=fams.length
+    ?fams.map(f=>`<div class="pyr-fam-tag">${f}</div>`).join('')
+    :'<div class="pyr-fam-tag" style="color:var(--off)">No especificadas</div>';
+
+  if(mapPoint){
+    document.getElementById('pyr-temp').textContent=mapPoint.x<.33?'Fresca':mapPoint.x<.67?'Templada':'Cálida';
+    document.getElementById('pyr-proy').textContent=mapPoint.y<.33?'Notoria':mapPoint.y<.67?'Media':'Discreta';
+  }else{
+    document.getElementById('pyr-temp').textContent='No especificada';
+    document.getElementById('pyr-proy').textContent='No especificada';
+  }
+  showSection('pyramid-wrap');
+  document.getElementById('refs-zone').innerHTML='<button class="refs-btn" onclick="generarReferencias()">GENERAR ↗</button>';
+  setTimeout(()=>initVector(d),80);
+}
+
+// ── ANALIZAR ──
+async function analizarFormulario(){
+  const btn=document.getElementById('btn-submit');
+  btn.disabled=true;
+  D=recoger();
+  showSection('analyzing-wrap');
+  try{
+    const res=await fetch('/.netlify/functions/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'gemini-3.1-flash-lite-preview',max_tokens:300,system:'Analizador de formularios de perfumería. Solo respondés en el formato indicado.',messages:[{role:'user',content:`Analizá este diagnóstico y detectá contradicciones.\n\n${fmt(D)}\n\nTIPOS: mismo perfume en pos y neg, lo que atrae contradice lo que rechaza, familias contradicen rechazos, intención contradice referencias.\n\nRESPONDÉ EXACTAMENTE:\nSIN_CONTRADICCIONES\no\nHAY_CONTRADICCIONES\n[pregunta concreta en español, tuteando, seco]`}]})});
+    const data=await res.json();
+    const text=data.content[0].text.trim();
+    if(text.startsWith('HAY_CONTRADICCIONES')){
+      const pregunta=text.replace('HAY_CONTRADICCIONES','').trim();
+      chatHistory=[];showSection('chat-wrap');
+      addMsg('score',pregunta);chatHistory.push({role:'assistant',content:pregunta});
+      document.getElementById('btn-send').disabled=false;
+      document.getElementById('user-input').focus();
+    }else{mostrarPiramide(D);}
+  }catch(err){mostrarPiramide(D);}
+  btn.disabled=false;
+}
+
+// ── CHAT ──
+async function responderChat(){
+  const input=document.getElementById('user-input');
+  const texto=input.value.trim();
+  if(!texto)return;
+  input.value='';autoResize(input);
+  const btn=document.getElementById('btn-send');
+  btn.disabled=true;
+  chatHistory.push({role:'user',content:texto});
+  addMsg('user',texto);
+  const typing=showTyping();
+  try{
+    const res=await fetch('/.netlify/functions/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'gemini-3.1-flash-lite-preview',max_tokens:300,system:`Sistema de aclaración de ESCENA SCORE.\nDiagnóstico:\n${fmt(D)}\nResolvé contradicciones. Una pregunta por turno. Tono seco. Cuando estén resueltas escribí: [ACLARACIONES_COMPLETAS]`,messages:chatHistory})});
+    const data=await res.json();
+    const text=data.content[0].text;
+    removeTyping(typing);
+    if(text.includes('[ACLARACIONES_COMPLETAS]')){
+      const cierre=text.split('[ACLARACIONES_COMPLETAS]')[0].trim();
+      if(cierre)addMsg('score',cierre);
+      setTimeout(()=>mostrarPiramide(D),800);
+    }else{
+      chatHistory.push({role:'assistant',content:text});
+      addMsg('score',text);btn.disabled=false;
+    }
+  }catch(err){removeTyping(typing);addMsg('score','Error de conexión.');btn.disabled=false;}
+}
+
+// ── CONFIRMAR ──
+async function confirmarEnvio(){
+  const btn=document.getElementById('btn-confirm');
+  btn.disabled=true;btn.textContent='ENVIANDO...';
+  const fecha=new Date().toLocaleDateString('es-AR');
+  let acl='';
+  if(chatHistory.length>0)acl='\n\nACLARACIONES\n'+chatHistory.map(m=>`${m.role==='user'?'CLIENTE':'SCORE'}:\n${m.content}`).join('\n\n---\n\n');
+  const msg=`ESCENA SCORE — DIAGNÓSTICO\nFecha: ${fecha}\n========================================\n\n${fmt(D)}${acl}\n\n========================================\nESCENA SCORE / USO INTERNO`;
+  try{
+    await emailjs.send(CONFIG.EMAILJS_SERVICE_ID,CONFIG.EMAILJS_TEMPLATE_ID,{to_email:CONFIG.EMAIL_DESTINO,subject:`ESCENA SCORE — ${D.nombre||'Diagnóstico'} — ${fecha}`,message:msg,name:D.nombre||'Cliente',email:D.email||''});
+  }catch(err){console.error(err);}
+  showSection('complete-wrap');
+  document.getElementById('strip-right').textContent='SCORE / DIAGNÓSTICO ENVIADO';
+}
+
+// ── UI ──
+function addMsg(role,text){
+  const msgs=document.getElementById('messages');
+  if(msgs.children.length>0){const hr=document.createElement('hr');hr.className='msg-rule';msgs.appendChild(hr);}
+  const div=document.createElement('div');div.className=`msg ${role}`;
+  div.innerHTML=`<div class="msg-role">${role==='user'?'VOS':'SCORE'}</div><div class="msg-text">${escHtml(text)}</div>`;
+  msgs.appendChild(div);msgs.scrollTop=msgs.scrollHeight;
+}
+function showTyping(){
+  const msgs=document.getElementById('messages');
+  const div=document.createElement('div');div.className='msg';
+  div.innerHTML='<div class="msg-role">SCORE</div><div class="typing"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
+  msgs.appendChild(div);msgs.scrollTop=msgs.scrollHeight;return div;
+}
+function removeTyping(el){if(el&&el.parentNode)el.parentNode.removeChild(el);}
+function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();responderChat();}}
+function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,120)+'px';}
+function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');}
+
+buildWheel();buildMap();
+</script>
+</body>
+</html>
