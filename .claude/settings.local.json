@@ -1,17 +1,21 @@
 {
   "permissions": {
     "allow": [
-      "Bash(git init *)",
-      "Bash(git add *)",
-      "Bash(git commit *)",
-      "Bash(git branch *)",
-      "Bash(curl -s -H \"Authorization: token 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\" https://api.github.com/user)",
-      "Bash(curl -s -X POST -H \"Authorization: token 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\" -H \"Content-Type: application/json\" -d '{\"name\":\"escena-v6\",\"private\":false}' https://api.github.com/user/repos)",
-      "Bash(curl -sI -H \"Authorization: token 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\" https://api.github.com/user)",
-      "Bash(curl -s -X POST -H \"Authorization: token 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\" -H \"Content-Type: application/json\" -d '{\"name\":\"escena-v6\",\"private\":false}' https://api.github.com/user/repos)",
-      "Bash(git remote *)",
-      "Bash(git push *)",
-      "Bash(GIT_ASKPASS=echo git push https://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@github.com/leoperrotta/escena-v6.git main)"
+      "Bash(git *)",
+      "Bash(GIT_TERMINAL_PROMPT=0 git *)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"d:/02-LEO/ESCENA/ITERACION 09/SCORE/web/escena-v6\" && git add . && git commit -m \"auto: update $(date +%H:%M:%S)\" && GIT_TERMINAL_PROMPT=0 git -c credential.helper= push origin main"
+          }
+        ]
+      }
     ]
   }
 }
