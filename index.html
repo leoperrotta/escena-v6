@@ -723,6 +723,14 @@ function initVector(d){
   window.addEventListener('mousemove',onMove);
 }
 
+// ── MANEJO DE ERRORES API ──
+function apiError(status){
+  if(status===429)return'Límite de consultas alcanzado. Esperá unos minutos e intentá de nuevo.';
+  if(status===503)return'Servicio no disponible en este momento.';
+  if(status>=500)return'Error en el servidor. Intentá de nuevo.';
+  return'Sin respuesta. Revisá tu conexión.';
+}
+
 // ── REFERENCIAS CULTURALES ──
 async function generarReferencias(){
   const zone=document.getElementById('refs-zone');
