@@ -687,7 +687,7 @@ async function generarReferencias(){
   zone.innerHTML='<div class="refs-loading">GENERANDO...</div>';
   const profile=[D.fragName||D.nombre||'fragancia',D.familias||'',D.intencion||'',D.narracion||'',D.atrae||'',D.rechaza||'',D.refPos||''].filter(Boolean).join(' — ');
   try{
-    const res=await fetch('/.netlify/functions/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+    const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
       max_tokens:800,
       system:'Sos un curador cultural con conocimiento profundo de arte, cine, música, fotografía y literatura. Respondés en español, de forma precisa y sin adornos.',
       messages:[{role:'user',content:`Dado este perfil de fragancia, identificá 5 referencias culturales que habiten el mismo espacio sensorial, emocional o estético. No que "huelen" a eso — que VIVEN en ese registro.
@@ -750,7 +750,7 @@ async function analizarFormulario(){
   D=recoger();
   showSection('analyzing-wrap');
   try{
-    const res=await fetch('/.netlify/functions/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'gemini-3.1-flash-lite-preview',max_tokens:300,system:'Analizador de formularios de perfumería. Solo respondés en el formato indicado.',messages:[{role:'user',content:`Analizá este diagnóstico y detectá contradicciones.\n\n${fmt(D)}\n\nTIPOS: mismo perfume en pos y neg, lo que atrae contradice lo que rechaza, familias contradicen rechazos, intención contradice referencias.\n\nRESPONDÉ EXACTAMENTE:\nSIN_CONTRADICCIONES\no\nHAY_CONTRADICCIONES\n[pregunta concreta en español, tuteando, seco]`}]})});
+    const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'gemini-3.1-flash-lite-preview',max_tokens:300,system:'Analizador de formularios de perfumería. Solo respondés en el formato indicado.',messages:[{role:'user',content:`Analizá este diagnóstico y detectá contradicciones.\n\n${fmt(D)}\n\nTIPOS: mismo perfume en pos y neg, lo que atrae contradice lo que rechaza, familias contradicen rechazos, intención contradice referencias.\n\nRESPONDÉ EXACTAMENTE:\nSIN_CONTRADICCIONES\no\nHAY_CONTRADICCIONES\n[pregunta concreta en español, tuteando, seco]`}]})});
     const data=await res.json();
     const text=data.content[0].text.trim();
     if(text.startsWith('HAY_CONTRADICCIONES')){
@@ -776,7 +776,7 @@ async function responderChat(){
   addMsg('user',texto);
   const typing=showTyping();
   try{
-    const res=await fetch('/.netlify/functions/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'gemini-3.1-flash-lite-preview',max_tokens:300,system:`Sistema de aclaración de ESCENA SCORE.\nDiagnóstico:\n${fmt(D)}\nResolvé contradicciones. Una pregunta por turno. Tono seco. Cuando estén resueltas escribí: [ACLARACIONES_COMPLETAS]`,messages:chatHistory})});
+    const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'gemini-3.1-flash-lite-preview',max_tokens:300,system:`Sistema de aclaración de ESCENA SCORE.\nDiagnóstico:\n${fmt(D)}\nResolvé contradicciones. Una pregunta por turno. Tono seco. Cuando estén resueltas escribí: [ACLARACIONES_COMPLETAS]`,messages:chatHistory})});
     const data=await res.json();
     const text=data.content[0].text;
     removeTyping(typing);

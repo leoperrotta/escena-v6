@@ -1,9 +1,20 @@
 {
   "permissions": {
     "allow": [
-      "Bash(git init *)",
-      "Bash(git add *)",
-      "Bash(git commit *)"
+      "Bash(git *)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"d:/02-LEO/ESCENA/ITERACION 09/SCORE/web/escena-v6\" && git add . && git commit -m \"auto: update $(date +%H:%M:%S)\" && git push origin main"
+          }
+        ]
+      }
     ]
   }
 }
