@@ -832,6 +832,7 @@ async function responderChat(){
   const typing=showTyping();
   try{
     const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'gemini-3.1-flash-lite-preview',max_tokens:300,system:`Sistema de aclaración de ESCENA SCORE.\nDiagnóstico:\n${fmt(D)}\nResolvé contradicciones. Una pregunta por turno. Tono seco. Cuando estén resueltas escribí: [ACLARACIONES_COMPLETAS]`,messages:chatHistory})});
+    if(!res.ok){removeTyping(typing);addMsg('score',apiError(res.status));btn.disabled=false;return;}
     const data=await res.json();
     const text=data.content[0].text;
     removeTyping(typing);
