@@ -843,7 +843,7 @@ async function responderChat(){
       chatHistory.push({role:'assistant',content:text});
       addMsg('score',text);btn.disabled=false;
     }
-  }catch(err){removeTyping(typing);addMsg('score','Error de conexión.');btn.disabled=false;}
+  }catch(err){removeTyping(typing);addMsg('score','Sin respuesta. Revisá tu conexión e intentá de nuevo.');btn.disabled=false;}
 }
 
 // ── CONFIRMAR ──
