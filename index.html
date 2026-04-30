@@ -766,6 +766,7 @@ ARTE — [obra o serie] — [artista]`}]
         const val=l.substring(dash+1).trim();
         return`<div class="refs-item"><span class="refs-cat">${cat}</span><span class="refs-val">${val}</span></div>`;
       }).join('');
+      refsTexto=lines.join('\n');
       zone.innerHTML=`<div class="refs-list">${items}</div><button class="refs-regen" onclick="generarReferencias()">REGENERAR ↗</button>`;
     }else{
       zone.innerHTML='<div class="refs-loading">Sin resultado. <button class="refs-btn" style="margin-left:8px" onclick="generarReferencias()">REINTENTAR</button></div>';
