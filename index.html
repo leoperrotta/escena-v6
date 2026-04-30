@@ -890,7 +890,8 @@ async function confirmarEnvio(){
   const obraNum=generarNumeroObra();
   let acl='';
   if(chatHistory.length>0)acl='\n\nACLARACIONES\n'+chatHistory.map(m=>`${m.role==='user'?'CLIENTE':'SCORE'}:\n${m.content}`).join('\n\n---\n\n');
-  const msg=`ESCENA SCORE — DIAGNÓSTICO\nFecha: ${fecha}\nOBRA: ESCENA-${obraNum}\n========================================\n\n${fmt(D)}${acl}\n\n========================================\nESCENA SCORE / USO INTERNO`;
+  const refs=refsTexto?`\n\nREFERENCIAS CULTURALES\n${refsTexto}`:'';
+  const msg=`ESCENA SCORE — DIAGNÓSTICO\nFecha: ${fecha}\nOBRA: ESCENA-${obraNum}\n========================================\n\n${fmt(D)}${acl}${refs}\n\n========================================\nESCENA SCORE / USO INTERNO`;
   try{
     await emailjs.send(CONFIG.EMAILJS_SERVICE_ID,CONFIG.EMAILJS_TEMPLATE_ID,{to_email:CONFIG.EMAIL_DESTINO,subject:`ESCENA SCORE — ESCENA-${obraNum} — ${D.nombre||'Diagnóstico'} — ${fecha}`,message:msg,name:D.nombre||'Cliente',email:D.email||''});
   }catch(err){console.error(err);}
