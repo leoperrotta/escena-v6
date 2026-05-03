@@ -890,7 +890,7 @@ async function confirmarEnvio(){
   btn.disabled=true;btn.textContent='ENVIANDO...';
   D.preguntaEscena=(document.getElementById('pyr-pregunta')||{}).value||'';
   const fecha=new Date().toLocaleDateString('es-AR');
-  const obraNum=generarNumeroObra();
+  const obraNum=await generarNumeroObra();
   let acl='';
   if(chatHistory.length>0)acl='\n\nACLARACIONES\n'+chatHistory.map(m=>`${m.role==='user'?'CLIENTE':'SCORE'}:\n${m.content}`).join('\n\n---\n\n');
   const refs=refsTexto?`\n\nREFERENCIAS CULTURALES\n${refsTexto}`:'';
