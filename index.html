@@ -795,8 +795,8 @@ function mostrarPiramide(d){
     document.getElementById('pyr-proy').textContent='No especificada';
   }
   showSection('pyramid-wrap');
-  document.getElementById('refs-zone').innerHTML='<button class="refs-btn" onclick="generarReferencias()">GENERAR ↗</button>';
   setTimeout(()=>initVector(d),80);
+  setTimeout(()=>generarReferencias(),200);
 }
 
 // ── ANALIZAR ──
