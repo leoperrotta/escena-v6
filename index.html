@@ -850,11 +850,14 @@ async function responderChat(){
 }
 
 // ── CONFIRMAR ──
-function generarNumeroObra(){
-  const stored=localStorage.getItem('escena_obra_counter');
-  const n=(parseInt(stored)||0)+1;
-  localStorage.setItem('escena_obra_counter',n);
-  return String(n).padStart(4,'0');
+async function generarNumeroObra(){
+  try{
+    const res=await fetch('/api/numero',{method:'POST'});
+    const data=await res.json();
+    return data.numero||'0000';
+  }catch(e){
+    return String(Date.now()).slice(-4);
+  }
 }
 
 async function generarManifiesto(d,obraNum){
