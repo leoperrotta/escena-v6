@@ -733,10 +733,11 @@ function apiError(status){
 }
 
 // ── REFERENCIAS CULTURALES ──
-async function generarReferencias(){
+async function generarReferencias(intento=0){
   const zone=document.getElementById('refs-zone');
-  zone.innerHTML='<div class="refs-loading">GENERANDO...</div>';
+  const maxIntentos=4;
   const profile=[D.fragName||D.nombre||'fragancia',D.familias||'',D.intencion||'',D.narracion||'',D.atrae||'',D.rechaza||'',D.refPos||''].filter(Boolean).join(' — ');
+  zone.innerHTML='<div class="refs-loading">GENERANDO...</div>';
   try{
     const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
       max_tokens:800,
@@ -752,6 +753,18 @@ FOTOGRAFÍA — [serie o obra] — [fotógrafo/a]
 LITERATURA — [título] — [autor/a]
 ARTE — [obra o serie] — [artista]`}]
     })});
+    if(res.status===429&&intento<maxIntentos){
+      let seg=20;
+      const intervalo=setInterval(()=>{
+        seg--;
+        const z=document.getElementById('refs-zone');
+        if(z)z.innerHTML=`<div class="refs-loading">Reintentando en ${seg}s...</div>`;
+        if(seg<=0)clearInterval(intervalo);
+      },1000);
+      await new Promise(r=>setTimeout(r,20000));
+      clearInterval(intervalo);
+      return generarReferencias(intento+1);
+    }
     if(!res.ok){
       zone.innerHTML=`<div class="refs-loading">${apiError(res.status)} <button class="refs-btn" style="margin-left:8px" onclick="generarReferencias()">REINTENTAR</button></div>`;
       return;
